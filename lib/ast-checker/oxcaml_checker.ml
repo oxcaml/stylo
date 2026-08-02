@@ -12,6 +12,7 @@ let cleaner =
   object
     method unit () () = ()
     method format__formatter () x = x (* eww. *)
+    method format_doc__t () x = x
 
     inherit [unit] Traversals_helpers.map_with_context
     inherit [unit] Ast_mapper.map_with_context as super
