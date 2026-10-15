@@ -1,0 +1,19 @@
+let f a b =
+  if
+    (* a comment long enough to have to be printed on several lines, given the
+       width limit *)
+    b
+  then 1
+  else 2
+;;
+
+let f a b =
+  if a
+  then 0
+  else if
+    (* a comment long enough to have to be printed on several lines, given the
+       width limit *)
+    b
+  then 1
+  else 2
+;;
