@@ -1623,8 +1623,8 @@ end = struct
   and pp_ite ?preceeding ?(kw = S.if_) ext_attr e1 e2 e3_o =
     let pre_kw, pre_nest =
       let decorated = Ext_attribute.decorate kw ext_attr in
-      let pre_ext = group (decorated ^^ break 1) in
-      Preceeding.(preceeding + tight pre_ext)
+      let pre_ext = group decorated in
+      Preceeding.(preceeding + spaced pre_ext)
     in
     let if_cond = pp ~preceeding:pre_kw e1 in
     let then_ = pp_if_branch S.then_ e2 in
