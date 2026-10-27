@@ -69,6 +69,16 @@
   (action (diff %{dep:docstring_placement.ml.stylo} %{dep:docstring_placement.ml.out})))
 
 (rule
+  (target else_if_comment.ml.out)
+  (action
+    (with-stdout-to %{target}
+      (run %{project_root}/bin/main.exe style --idempotence-check --width 90 %{dep:else_if_comment.ml}))))
+
+(rule
+  (alias runtest)
+  (action (diff %{dep:else_if_comment.ml.stylo} %{dep:else_if_comment.ml.out})))
+
+(rule
   (target ext_attributes.ml.out)
   (action
     (with-stdout-to %{target}
