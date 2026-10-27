@@ -22,6 +22,7 @@ open Parsetree
 
 val structure : structure -> (Tokens.seq, [> Error.t ]) result
 val signature : signature -> (Tokens.seq, [> Error.t ]) result
+val use_file : use_file -> (Tokens.seq, [> Error.t ]) result
 
 (**/**)
 

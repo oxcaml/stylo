@@ -10,3 +10,4 @@ end
 
 val structure : Options.t -> structure -> structure
 val signature : Options.t -> signature -> signature
+val use_file : Options.t -> use_file -> use_file

@@ -124,13 +124,9 @@ module Arg = struct
   ;;
 end
 
-let do_style run options is_mli fname ?(lnum = 1) source =
+let do_style run options kind fname ?(lnum = 1) source =
   let input =
-    { Ocaml_syntax.Source.fname
-    ; source
-    ; start_line = lnum
-    ; kind = if is_mli then Intf else Impl
-    }
+    { Ocaml_syntax.Source.fname; source; start_line = lnum; kind }
   in
   (run options input
    : (string, Stylo.Pipeline.error) result
@@ -201,12 +197,13 @@ let fuzzer_batch ~options ~quiet ~idempotence_check ~failures_dir fn =
           entrypoint_and_src
       in
       let intf, source = split_fuzzer_line entrypoint_and_src in
+      let kind : Ocaml_syntax.Source.kind = if intf then Intf else Impl in
       let module Style = Janestreet_style.Without_normalization in
-      match do_style Style.run options intf fn ~lnum source with
+      match do_style Style.run options kind fn ~lnum source with
       | Ok fst_round ->
         if idempotence_check
         then (
-          match do_style Style.run options intf fn ~lnum fst_round with
+          match do_style Style.run options kind fn ~lnum fst_round with
           | Ok snd_round when fst_round = snd_round -> ()
           | _ -> save_failure entrypoint_and_src);
         loop_entries next_lnum ic
@@ -270,14 +267,22 @@ type file_kind =
   | Regular
   | Stdin
 
+let kind_of_fname fname : Ocaml_syntax.Source.kind =
+  if Filename.check_suffix fname ".mli"
+  then Intf
+  else if Filename.check_suffix fname ".mlt"
+  then Toplevel
+  else Impl
+;;
+
 let style_input ~options check_idempotence fkind fname =
-  let is_mli = Filename.check_suffix fname ".mli" in
+  let kind = kind_of_fname fname in
   let source =
     match fkind with
     | Regular -> In_channel.(with_open_text fname input_all)
     | Stdin -> In_channel.input_all stdin
   in
-  let result = do_style Janestreet_style.run options is_mli fname source in
+  let result = do_style Janestreet_style.run options kind fname source in
   if not check_idempotence
   then result
   else
@@ -287,7 +292,7 @@ let style_input ~options check_idempotence fkind fname =
     then (* input might already have been formatted *) result
     else (* general case, we styled the input, next round ought to be a noop *)
       let* snd_round =
-        do_style Janestreet_style.run options is_mli fname fst_round
+        do_style Janestreet_style.run options kind fname fst_round
       in
       if fst_round = snd_round then result else Error `Not_idempotent
 ;;

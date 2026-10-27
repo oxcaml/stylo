@@ -13,7 +13,7 @@
  (aliases all default runtest)
  (deps
   ./gen-dune.sh
-  (glob_files *.{ml,mli,stylo}))
+  (glob_files *.{ml,mli,mlt,stylo}))
  (action
   (progn
    (with-stdout-to

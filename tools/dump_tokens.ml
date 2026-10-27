@@ -137,7 +137,7 @@ let run start stop source =
       Ocaml_syntax.Parse.Options.default
       { kind = Impl; fname = "buffer"; source; start_line = 0 }
   with
-  | Ok (Signature _) -> assert false
+  | Ok (Signature _ | Toplevel _) -> assert false
   | Ok (Structure cst) ->
     let range =
       match stop with

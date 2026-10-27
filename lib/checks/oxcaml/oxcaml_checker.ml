@@ -125,6 +125,7 @@ type options =
 type ast =
   | Structure of Parsetree.structure
   | Signature of Parsetree.signature
+  | Toplevel of Parsetree.toplevel_phrase list
 
 let parse options (input : Ocaml_syntax.Source.t) wrap_exn : (ast, _) result =
   Oxcaml_frontend.Config.syntax_quotations := options.syntax_quotations;
@@ -141,7 +142,8 @@ let parse options (input : Ocaml_syntax.Source.t) wrap_exn : (ast, _) result =
     Ok
       (match input.kind with
        | Impl -> Structure (Parse.implementation lb)
-       | Intf -> Signature (Parse.interface lb))
+       | Intf -> Signature (Parse.interface lb)
+       | Toplevel -> Toplevel (Parse.use_file lb))
   with
   | exn -> Error (wrap_exn lb.lex_start_p lb.lex_curr_p exn)
 ;;
@@ -149,6 +151,9 @@ let parse options (input : Ocaml_syntax.Source.t) wrap_exn : (ast, _) result =
 let clean ~erase_jane_syntax = function
   | Structure str -> Structure ((cleaner erase_jane_syntax)#structure () str)
   | Signature sg -> Signature ((cleaner erase_jane_syntax)#signature () sg)
+  | Toplevel phrases ->
+    let cleaner = cleaner erase_jane_syntax in
+    Toplevel (List.map (cleaner#toplevel_phrase ()) phrases)
 ;;
 
 let report_parse_error ppf exn =
@@ -186,7 +191,8 @@ let dump_ast options (input : Ocaml_syntax.Source.t) ~src ast =
       fun ppf ->
         match ast with
         | Structure str -> implementation ppf str
-        | Signature sg -> interface ppf sg)
+        | Signature sg -> interface ppf sg
+        | Toplevel phrases -> List.iter (top_phrase ppf) phrases)
 ;;
 
 let dump_out options (output : Ocaml_syntax.Source.t) =

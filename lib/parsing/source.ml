@@ -3,6 +3,7 @@
 type kind =
   | Impl
   | Intf
+  | Toplevel (** a toplevel script, e.g. a [.mlt] file *)
 
 type t =
   { fname : string

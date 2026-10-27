@@ -1,0 +1,31 @@
+#use "topfind";;
+#require    "core";;
+#directory  "+threads"
+#print_depth 3;;
+#install_printer Foo.pp;;
+#warnings {|+a|};;
+#labels true;;
+
+(* a comment *)
+let x   = 1 + 2;;
+let y = x
+let z = y;;
+[%%expect {|
+val x : int = 3
+|}]
+
+#show_type  list;;
+
+(** a docstring *)
+type t = A | B;;
+
+x + y;;
+let f x =
+  (* inside *)
+  match x with A -> 1 | B -> 2;;
+#quit
+
+#use (* c1 *) "a" (* c2 *);; (* c3 *)
+#use "a_really_long_file_name_that_does_not_fit_on_a_single_line_with_the_directive_name.ml";;
+#trace List.map;;
+#use {foo|bar|foo};;

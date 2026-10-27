@@ -24,3 +24,10 @@ let interface options lb =
   let with_cmts = Tokens.attach_leading_and_trailing sg.psg_tokens in
   { sg with psg_tokens = with_cmts }
 ;;
+
+let use_file options lb =
+  init options;
+  let uf = Parser.use_file Lexer.token_updating_indexed_list lb in
+  let all_tokens = Tokens.attach_leading_and_trailing uf.puf_tokens in
+  { uf with puf_tokens = all_tokens }
+;;

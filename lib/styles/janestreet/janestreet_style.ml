@@ -8,6 +8,7 @@ module Style = struct
   let normalize options : Cst.t -> Cst.t = function
     | Structure str -> Structure (Normalize.structure options.normalize str)
     | Signature sg -> Signature (Normalize.signature options.normalize sg)
+    | Toplevel uf -> Toplevel (Normalize.use_file options.normalize uf)
   ;;
 
   (* tying the knot between code and docstring's printer. *)
@@ -20,6 +21,7 @@ module Style = struct
     function
     | Structure str -> Print.Structure.pp_implementation str
     | Signature sg -> Print.Signature.pp_interface sg
+    | Toplevel uf -> Print.Toplevel.pp_use_file uf
   ;;
 
   let render_comment _ ~format_code_block =

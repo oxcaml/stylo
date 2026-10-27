@@ -66,7 +66,8 @@ let parse options (input : Source.t) wrap_exn : (ast, _) result =
     Ok
       (match input.kind with
        | Impl -> Structure (Parse.implementation options lb)
-       | Intf -> Signature (Parse.interface options lb))
+       | Intf -> Signature (Parse.interface options lb)
+       | Toplevel -> Toplevel (Parse.use_file options lb))
   with
   | exn -> Error (wrap_exn lb.lex_start_p lb.lex_curr_p exn)
 ;;
@@ -74,6 +75,7 @@ let parse options (input : Source.t) wrap_exn : (ast, _) result =
 let clean : Cst.t -> Cst.t = function
   | Structure str -> Structure (cleaner#structure () str)
   | Signature sg -> Signature (cleaner#signature () sg)
+  | Toplevel uf -> Toplevel (cleaner#use_file () uf)
 ;;
 
 let input_wrap startp endp exn = Errors.Stylo's, startp, endp, exn

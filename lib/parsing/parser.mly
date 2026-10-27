@@ -657,6 +657,7 @@ let mk_directive ~loc name arg =
       pdir_name = name;
       pdir_arg = arg;
       pdir_loc = make_loc loc;
+      pdir_tokens = Tokens.at loc;
     }
 
 (* Unboxed literals *)
@@ -782,7 +783,7 @@ The precedences must be listed from low to high.
 %start toplevel_phrase                  /* for interactive use */
 %type <Parsetree.toplevel_phrase> toplevel_phrase
 %start use_file                         /* for the #use directive */
-%type <Parsetree.toplevel_phrase list> use_file
+%type <Parsetree.use_file> use_file
 /* BEGIN AVOID */
 %start parse_module_type
 %type <Parsetree.module_type> parse_module_type
@@ -1138,15 +1139,34 @@ toplevel_phrase:
 
 (* An .ml file that is read by #use. *)
 use_file:
-  (* An optional standalone expression,
-     followed with a series of elements,
-     followed with EOF. *)
+  use_file_phrases EOF
+    { $1 }
+;
+
+(* An optional standalone expression,
+   followed with a series of elements. *)
+use_file_phrases:
   extra_def(append(
     optional_use_file_standalone_expression,
     flatten(use_file_element*)
   ))
-  EOF
-    { $1 }
+  { let phrases = $1 in
+    (* Same positions fiddling as for [signature], see the comment there. *)
+    let phrase_loc = function
+      | Ptop_def { pst_loc = loc; _ } | Ptop_dir { pdir_loc = loc; _ } -> loc
+    in
+    let sloc =
+      match phrases with
+      | [] -> $symbolstartpos, $endpos
+      | first :: _ ->
+        let startp = (phrase_loc first).loc_start in
+        let endp = (phrase_loc (Std.List.last phrases)).loc_end in
+        if $symbolstartpos = $endpos
+        then startp, endp
+        else min $symbolstartpos startp, max $endpos endp
+    in
+    { puf_phrases = phrases; puf_loc = make_loc sloc;
+      puf_tokens = Tokens.at sloc } }
 ;
 
 (* An optional standalone expression is just an expression with attributes
@@ -5110,7 +5130,7 @@ toplevel_directive:
 ;
 
 %inline toplevel_directive_argument:
-  | STRING        { let (s, _, _) = $1 in Pdir_string s }
+  | STRING        { let (s, _, d) = $1 in Pdir_string (s, d) }
   | INT           { let (n, m) = $1 in Pdir_int (n ,m) }
   | val_longident { Pdir_ident $1 }
   | mod_longident { Pdir_ident $1 }

@@ -10,3 +10,7 @@ end
 module Signature : sig
   val pp_interface : signature -> Document.t
 end
+
+module Toplevel : sig
+  val pp_use_file : use_file -> Document.t
+end

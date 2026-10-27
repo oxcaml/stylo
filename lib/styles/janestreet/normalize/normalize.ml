@@ -296,3 +296,20 @@ let normalizer (options : Options.t) =
 
 let structure options s = (normalizer options)#structure Other s
 let signature options s = (normalizer options)#signature Other s
+
+let use_file options uf =
+  let normalize_phrase = function
+    | Ptop_dir _ as dir -> dir
+    | Ptop_def str ->
+      let str = structure options str in
+      (* [;;] are meaningful in toplevel scripts: the ones the user wrote live
+         in [uf.puf_tokens], which we leave untouched. The structures wrapping
+         each phrase have no [;;] of their own, so we drop any the normalizer
+         added there. *)
+      Ptop_def
+        { str with
+          pst_tokens = Tokens.Seq.without ~token:SEMISEMI str.pst_tokens
+        }
+  in
+  { uf with puf_phrases = List.map normalize_phrase uf.puf_phrases }
+;;

@@ -199,6 +199,16 @@
   (action (diff %{dep:string_lits.ml.stylo} %{dep:string_lits.ml.out})))
 
 (rule
+  (target toplevel_directives.mlt.out)
+  (action
+    (with-stdout-to %{target}
+      (run %{project_root}/bin/main.exe style --idempotence-check --width 90 %{dep:toplevel_directives.mlt}))))
+
+(rule
+  (alias runtest)
+  (action (diff %{dep:toplevel_directives.mlt.stylo} %{dep:toplevel_directives.mlt.out})))
+
+(rule
   (target tuples.ml.out)
   (action
     (with-stdout-to %{target}

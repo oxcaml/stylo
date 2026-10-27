@@ -104,7 +104,8 @@ module Pipeline = struct
       Ok
         (match input.kind with
          | Impl -> Structure (Parse.implementation options lb)
-         | Intf -> Signature (Parse.interface options lb))
+         | Intf -> Signature (Parse.interface options lb)
+         | Toplevel -> Toplevel (Parse.use_file options lb))
     with
     | exn ->
       Error
@@ -129,6 +130,7 @@ module Pipeline = struct
   let tokens_of_tree : Cst.t -> (Tokens.seq, _) result = function
     | Structure str -> Tokens_of_tree.structure str
     | Signature sg -> Tokens_of_tree.signature sg
+    | Toplevel uf -> Tokens_of_tree.use_file uf
   ;;
 
   let print_doc ~width doc = Document.Print.to_string ~width doc

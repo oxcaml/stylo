@@ -4525,27 +4525,30 @@ end = struct
   ;;
 end
 
-(* FIXME: TODO? *)
-(* (**
+module Toplevel = struct
+  let directive_argument { pdira_desc; pdira_loc = _ } =
+    match pdira_desc with
+    | Pdir_string (s, None) -> String_lit.pp s
+    | Pdir_string (s, Some delim) -> fancy_string "{%s|%s|%s}" delim s delim
+    | Pdir_int (nb, None) -> string nb
+    | Pdir_int (nb, Some suffix) -> stringf "%s%c" nb suffix
+    | Pdir_ident lid -> longident lid
+    | Pdir_bool b -> string (Bool.to_string b)
+  ;;
 
-   {1 Toplevel}
+  let directive { pdir_name; pdir_arg; pdir_loc = _; pdir_tokens = _ } =
+    let name = S.hash ^^ string pdir_name.txt in
+    match pdir_arg with
+    | None -> name
+    | Some arg -> group (name ^/^ nest 2 (directive_argument arg))
+  ;;
 
-   *)
+  let pp_phrase = function
+    | Ptop_dir dir -> directive dir
+    | Ptop_def str -> Structure.pp_implementation str
+  ;;
 
-   (**
-
-   {2 Toplevel phrases}
-
-   *)
-
-   type toplevel_phrase = | Ptop_def of structure | Ptop_dir of
-   toplevel_directive (** [#use], [#load] ... *)
-
-   and toplevel_directive =
-   [{ pdir_name: string loc; pdir_arg: directive_argument option; pdir_loc: Location.t; }]
-
-   and directive_argument =
-   [{ pdira_desc: directive_argument_desc; pdira_loc: Location.t; }]
-
-   and directive_argument_desc = | Pdir_string of string | Pdir_int of string *
-   char option | Pdir_ident of Longident.t | Pdir_bool of bool *)
+  let pp_use_file uf =
+    group (Toplevel_items.Top.pp_grouped_keeping_semi pp_phrase uf)
+  ;;
+end

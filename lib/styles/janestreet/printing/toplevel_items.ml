@@ -236,6 +236,27 @@ module Sig = struct
   ;;
 end
 
+module Top = struct
+  open Ocaml_syntax.Parsetree
+
+  let same_group p1 p2 =
+    match p1, p2 with
+    | Ptop_dir _, Ptop_dir _ -> true
+    | Ptop_def { pst_items = [ i1 ]; _ }, Ptop_def { pst_items = [ i2 ]; _ } ->
+      Struct.same_group i1 i2
+    | (Ptop_def _ | Ptop_dir _), _ -> false
+  ;;
+
+  let pp_grouped_keeping_semi pp_phrase uf =
+    let groups =
+      match uf.puf_phrases with
+      | [] -> []
+      | phrase :: phrases -> group_by_desc same_group [ phrase ] phrases
+    in
+    pp_grouped_keeping_semi pp_phrase groups uf.puf_tokens
+  ;;
+end
+
 let pp_keeping_semi pp (items, tokens) =
   match pp_keeping_semi pp empty items tokens with
   | t, Done -> t

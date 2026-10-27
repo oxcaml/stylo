@@ -430,6 +430,16 @@ let tokenizer =
       let sub_tokens = super#functor_parameter fp in
       let node_toks = fp.pfp_tokens in
       combine_children "functor_parameter" ~loc:fp.pfp_loc node_toks sub_tokens
+
+    method! toplevel_directive dir =
+      let sub_tokens = super#toplevel_directive dir in
+      let node_toks = dir.pdir_tokens in
+      combine_children "toplevel_directive" ~loc:dir.pdir_loc node_toks sub_tokens
+
+    method! use_file uf =
+      let sub_tokens = super#use_file uf in
+      let node_toks = uf.puf_tokens in
+      combine_children "use_file" ~loc:uf.puf_loc node_toks sub_tokens
   end
 ;;
 
@@ -448,6 +458,7 @@ let flatten_or_error
 
 let structure = flatten_or_error tokenizer#structure
 let signature = flatten_or_error tokenizer#signature
+let use_file = flatten_or_error tokenizer#use_file
 let modes = flatten_or_error tokenizer#modes
 let jkind_annotation = flatten_or_error tokenizer#jkind_annotation
 let signature_item = flatten_or_error tokenizer#signature_item

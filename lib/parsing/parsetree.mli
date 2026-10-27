@@ -1459,13 +1459,27 @@ and toplevel_directive =
   { pdir_name : string loc
   ; pdir_arg : directive_argument option
   ; pdir_loc : Location.t
+  ; pdir_tokens : Tokens.seq
   }
 and directive_argument =
   { pdira_desc : directive_argument_desc
   ; pdira_loc : Location.t
   }
 and directive_argument_desc =
-  | Pdir_string of string
+  | Pdir_string of string * string option
+    (** Same as for [Pconst_string]: the optional string is the delimiter of
+        quoted strings. *)
   | Pdir_int of string * char option
   | Pdir_ident of Longident.t
   | Pdir_bool of bool
+
+(** {2 Toplevel scripts} *)
+
+(** The contents of a toplevel script (e.g. a [.mlt] file), as read by [#use].
+
+    Each structure item is wrapped in its own [Ptop_def]. *)
+and use_file =
+  { puf_phrases : toplevel_phrase list
+  ; puf_loc : Location.t
+  ; puf_tokens : Tokens.seq
+  }
